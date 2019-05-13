@@ -3,7 +3,7 @@
 function usage() {
   echo ""
   echo "Usage:"
-  echo "    $0 [--nodeCount (default = 7)]"
+  echo "    $0 [--nodeCount n (default = 7)]"
   echo ""
   echo "Where:"
   echo "    --nodeCount: how many nodes should be created"
@@ -17,6 +17,11 @@ while (( "$#" )); do
         --nodeCount)
             nodeCount=$2
             shift 2
+            ;;
+        --help)
+            shift
+            usage
+            exit 0
             ;;
         *)
             echo "Error: Unsupported command line parameter $1"

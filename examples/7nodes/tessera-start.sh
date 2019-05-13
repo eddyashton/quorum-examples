@@ -5,12 +5,13 @@ set -e
 function usage() {
   echo ""
   echo "Usage:"
-  echo "    $0 [--tesseraJar path to Tessera jar file] [--remoteDebug] [--jvmParams \"JVM parameters\"]"
+  echo "    $0 [--tesseraJar path to Tessera jar file] [--remoteDebug] [--jvmParams \"JVM parameters\"] [--nodeCount n]"
   echo ""
   echo "Where:"
   echo "    --tesseraJar specifies path to the jar file, default is to use the vagrant location"
   echo "    --remoteDebug enables remote debug on port 500n for each Tessera node (for use with JVisualVm etc)"
   echo "    --jvmParams specifies parameters to be used by JVM when running Tessera"
+  echo "    --nodeCount specifies number of nodes to be started, defaults to 7"
   echo "Notes:"
   echo "    Tessera jar location defaults to ${defaultTesseraJarExpr};"
   echo "    however, this can be overridden by environment variable TESSERA_JAR or by the command line option."
@@ -30,6 +31,7 @@ fi
 
 remoteDebug=false
 jvmParams=
+nodeCount=7
 while (( "$#" )); do
   case "$1" in
     --tesseraJar)
@@ -42,6 +44,10 @@ while (( "$#" )); do
       ;;
     --jvmParams)
       jvmParams=$2
+      shift 2
+      ;;
+    --nodeCount)
+      nodeCount=$2
       shift 2
       ;;
     --help)
@@ -77,7 +83,7 @@ fi
 echo Config type $TESSERA_CONFIG_TYPE
 
 currentDir=`pwd`
-for i in {1..7}
+for i in $(seq 1 ${nodeCount})
 do
     DDIR="qdata/c$i"
     mkdir -p ${DDIR}
@@ -107,7 +113,7 @@ k=10
 while ${DOWN}; do
     sleep 1
     DOWN=false
-    for i in {1..7}
+    for i in $(seq 1 ${nodeCount})
     do
         if [ ! -S "qdata/c${i}/tm.ipc" ]; then
             echo "Node ${i} is not yet listening on tm.ipc"
