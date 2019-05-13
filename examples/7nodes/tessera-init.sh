@@ -1,9 +1,48 @@
 #!/usr/bin/env bash
 
-echo "[*] Initialising Tessera configuration"
+function usage() {
+  echo ""
+  echo "Usage:"
+  echo "    $0 [--nodeCount (default = 7)]"
+  echo ""
+  echo "Where:"
+  echo "    --nodeCount: how many nodes should be created"
+  echo ""
+  exit -1
+}
+
+nodeCount=7
+while (( "$#" )); do
+    case "$1" in
+        --nodeCount)
+            nodeCount=$2
+            shift 2
+            ;;
+        *)
+            echo "Error: Unsupported command line parameter $1"
+            usage
+            ;;
+    esac
+done
+
+echo "[*] Initialising Tessera configuration with ${nodeCount} nodes"
+
+peers=""
+
+for i in $(seq 1 ${nodeCount})
+do
+    peers+="
+        {
+            \"url\": \"http://localhost:900${i}\"
+        }"
+    if [ ${i} -ne ${nodeCount} ]
+    then
+        peers+=','
+    fi
+done
 
 currentDir=$(pwd)
-for i in {1..7}
+for i in $(seq 1 ${nodeCount})
 do
     DDIR="${currentDir}/qdata/c${i}"
     mkdir -p ${DDIR}
@@ -59,27 +98,7 @@ cat <<EOF > ${DDIR}/tessera-config-09-${i}.json
         }
     ],
     "peer": [
-        {
-            "url": "http://localhost:9001"
-        },
-        {
-            "url": "http://localhost:9002"
-        },
-        {
-            "url": "http://localhost:9003"
-        },
-        {
-            "url": "http://localhost:9004"
-        },
-        {
-            "url": "http://localhost:9005"
-        },
-        {
-            "url": "http://localhost:9006"
-        },
-        {
-            "url": "http://localhost:9007"
-        }
+        ${peers}
     ],
     "keys": {
         "passwords": [],
@@ -135,27 +154,7 @@ cat <<EOF > ${DDIR}/tessera-config-enclave-09-${i}.json
         }
     ],
     "peer": [
-        {
-            "url": "http://localhost:9001"
-        },
-        {
-            "url": "http://localhost:9002"
-        },
-        {
-            "url": "http://localhost:9003"
-        },
-        {
-            "url": "http://localhost:9004"
-        },
-        {
-            "url": "http://localhost:9005"
-        },
-        {
-            "url": "http://localhost:9006"
-        },
-        {
-            "url": "http://localhost:9007"
-        }
+        ${peers}
     ]
 }
 EOF
